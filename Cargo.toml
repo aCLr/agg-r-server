@@ -1,0 +1,41 @@
+[package]
+name = "standalone-server"
+version = "0.1.0"
+authors = ["aCLr <a.ch.clr@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lazy_static = "1.4"
+diesel = {versin ="*", features = ["chrono"]}
+tokio = "*"
+chrono = {version ="*", features = ["serde"]}
+tokio-diesel = "*"
+env_logger = "*"
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+
+[dependencies.actix]
+version = "0.10.0"
+
+[dependencies.feedr]
+path = "../feedr"
+
+[dependencies.actix-cors]
+version = "0.5.1"
+
+[dependencies.actix-rt]
+version = "1.1.1"
+
+[dependencies.derive_more]
+version = "0.99.11"
+
+[dependencies.actix-web]
+version = "3.2.0"
+
+[dependencies.config]
+version = "0.9"
+features = ["yaml"]
