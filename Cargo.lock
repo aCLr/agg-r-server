@@ -2665,7 +2665,7 @@ dependencies = [
  "derive_more",
  "diesel",
  "env_logger",
- "futures-util",
+ "futures",
  "lazy_static 1.4.0",
  "log",
  "serde 1.0.117",

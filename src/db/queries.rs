@@ -6,7 +6,9 @@ use crate::db::models::{RecordWithMeta, User};
 use crate::db::Pool;
 use crate::schema::{records, records_meta, sources, users};
 use chrono::NaiveDateTime;
+use diesel::dsl::exists;
 use diesel::pg::upsert::excluded;
+use diesel::select;
 use diesel::sql_types::{Bool, Nullable};
 use tokio_diesel::*;
 
@@ -179,9 +181,14 @@ pub async fn get_user_by_token(db_pool: &Pool, token: String) -> Option<User> {
     let user = users::table
         .filter(users::token.eq(token))
         .first_async::<User>(db_pool)
-        .await;
-    match user {}
+        .await
+        .unwrap();
+    Some(user)
 }
 
-
-pub async fn check_user_exists()
+pub async fn check_token(db_pool: &Pool, token: String) -> bool {
+    select(exists(users::table.filter(users::token.eq(token))))
+        .get_result_async(db_pool)
+        .await
+        .unwrap()
+}

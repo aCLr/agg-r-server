@@ -14,7 +14,7 @@ chrono = {version ="*", features = ["serde"]}
 tokio-diesel = "*"
 env_logger = "*"
 log = "*"
-futures-util = "*"
+futures = "*"
 
 actix-web-httpauth = "0.5.0"
 actix-identity = "0.3.1"

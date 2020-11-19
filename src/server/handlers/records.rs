@@ -2,7 +2,7 @@ use crate::db::models::RecordWithMeta;
 use crate::db::queries;
 use crate::db::Pool;
 use crate::server::errors::ApiError;
-use actix_web::web::{Data, Json, Path, Query};
+use actix_web::web::{Data, HttpRequest, Json, Path, Query};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
