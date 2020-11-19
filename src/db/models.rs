@@ -13,3 +13,10 @@ pub struct RecordWithMeta {
     pub image: Option<String>,
     pub starred: Option<bool>,
 }
+
+#[derive(Queryable, Serialize, Deserialize, Clone, Debug)]
+pub struct User {
+    pub id: i32,
+    pub last_read_date: NaiveDateTime,
+    pub token: Option<String>,
+}

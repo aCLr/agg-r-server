@@ -1,5 +1,5 @@
 use crate::server::handlers::records::{get_records, mark_record};
-use crate::server::handlers::sources::{create_source, get_sources};
+use crate::server::handlers::sources::{create_source, delete_source, get_sources};
 use actix_web::web;
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
@@ -13,7 +13,8 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/sources")
                     .route("/", web::get().to(get_sources))
-                    .route("/", web::post().to(create_source)),
+                    .route("/", web::post().to(create_source))
+                    .route("/{source_id}", web::delete().to(delete_source)),
             ),
     );
 }

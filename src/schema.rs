@@ -35,6 +35,7 @@ table! {
         origin -> Text,
         kind -> Text,
         image -> Nullable<Text>,
+        last_scrape_time -> Timestamp,
     }
 }
 
@@ -42,6 +43,7 @@ table! {
     users (id) {
         id -> Int4,
         last_read_date -> Timestamp,
+        token -> Nullable<Text>,
     }
 }
 
@@ -49,4 +51,10 @@ joinable!(records -> sources (source_id));
 joinable!(records_meta -> records (record_id));
 joinable!(records_meta -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(records, records_meta, settings, sources, users,);
+allow_tables_to_appear_in_same_query!(
+    records,
+    records_meta,
+    settings,
+    sources,
+    users,
+);

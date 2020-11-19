@@ -105,8 +105,8 @@ impl From<BlockingError<ApiError>> for ApiError {
     }
 }
 
-impl From<feedr::error::Error> for ApiError {
-    fn from(error: feedr::error::Error) -> Self {
+impl From<agg_r::error::Error> for ApiError {
+    fn from(error: agg_r::error::Error) -> Self {
         ApiError::InternalServerError(error.message)
     }
 }

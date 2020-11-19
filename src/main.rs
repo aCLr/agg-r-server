@@ -1,8 +1,10 @@
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate log;
 
-use feedr::aggregator;
-use feedr::config;
+use agg_r::aggregator;
+use agg_r::config;
 mod settings;
 use settings::SETTINGS;
 use std::sync::Arc;
@@ -15,7 +17,7 @@ async fn main() {
     env_logger::init();
     settings::init();
     let db_pool = db::init_pool(settings::SETTINGS.database.url.as_str());
-    feedr::db::migrate(&db_pool).expect("migrations failed");
+    agg_r::db::migrate(&db_pool).expect("migrations failed");
     let http_config = config::HttpConfigBuilder::default()
         .enabled(SETTINGS.collectors.http.enabled)
         .sleep_secs(SETTINGS.collectors.http.sleep_secs)

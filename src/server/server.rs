@@ -5,7 +5,7 @@ use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use actix_web::{App, HttpServer};
-use feedr::aggregator::Aggregator;
+use agg_r::aggregator::Aggregator;
 use std::sync::Arc;
 
 pub async fn server(aggregator: Arc<Aggregator>, db_pool: Pool) -> std::io::Result<()> {

@@ -1,14 +1,16 @@
-use diesel::insert_into;
 use diesel::prelude::*;
 use diesel::Queryable;
+use diesel::{delete, insert_into};
 
-use crate::db::models::RecordWithMeta;
+use crate::db::models::{RecordWithMeta, User};
 use crate::db::Pool;
-use crate::schema::{records, records_meta, users};
+use crate::schema::{records, records_meta, sources, users};
 use chrono::NaiveDateTime;
 use diesel::pg::upsert::excluded;
 use diesel::sql_types::{Bool, Nullable};
 use tokio_diesel::*;
+
+sql_function!(fn coalesce(x: Nullable<Bool>, y: Bool) -> Bool);
 
 #[derive(Queryable)]
 struct Meta {
@@ -160,4 +162,26 @@ pub async fn mark_record(db_pool: &Pool, record_id: i32, starred: bool) -> Recor
         .unwrap()
 }
 
-sql_function!(fn coalesce(x: Nullable<Bool>, y: Bool) -> Bool);
+pub async fn delete_source(db_pool: &Pool, source_id: i32) {
+    let records = records::table.filter(records::source_id.eq(source_id));
+    delete(records_meta::table.filter(records_meta::record_id.eq_any(records.select(records::id))))
+        .execute_async(db_pool)
+        .await
+        .unwrap();
+    delete(records).execute_async(db_pool).await.unwrap();
+    delete(sources::table.filter(sources::id.eq(source_id)))
+        .execute_async(db_pool)
+        .await
+        .unwrap();
+}
+
+pub async fn get_user_by_token(db_pool: &Pool, token: String) -> Option<User> {
+    let user = users::table
+        .filter(users::token.eq(token))
+        .first_async::<User>(db_pool)
+        .await;
+    match user {}
+}
+
+
+pub async fn check_user_exists()
