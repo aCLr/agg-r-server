@@ -1,32 +1,19 @@
-use actix::prelude::*;
-use actix_identity::{CookieIdentityPolicy, Identity, IdentityService};
 use actix_web::dev::*;
-use actix_web::http;
 use actix_web::http::header::Header;
-use actix_web::middleware::Logger;
 use actix_web::{
-    dev::Payload, error::ErrorUnauthorized, web, App, Error, FromRequest, HttpMessage, HttpRequest,
-    HttpResponse, HttpServer, Responder,
+    dev::Payload, error::ErrorUnauthorized, Error, FromRequest, HttpMessage, HttpRequest,
 };
 use futures::{future, task, FutureExt};
-use log::{info, warn};
-use serde::{Deserialize, Serialize};
 use std::rc::Rc;
-use std::{collections::HashMap, pin::Pin, sync::RwLock};
 
 use actix_web::dev::ServiceRequest;
 
 use crate::db::models::User;
 use crate::db::queries;
 use crate::db::Pool;
-use actix_web::error::ParseError;
 use actix_web::web::Data;
-use actix_web_httpauth::extractors::bearer::{BearerAuth, Config};
-use actix_web_httpauth::extractors::AuthenticationError;
 use actix_web_httpauth::headers::authorization;
-use actix_web_httpauth::headers::authorization::Bearer;
-use actix_web_httpauth::headers::www_authenticate::bearer;
-use futures::future::{err, ok, LocalBoxFuture, Ready};
+use futures::future::{ok, LocalBoxFuture};
 use futures::task::Poll;
 use std::cell::RefCell;
 
@@ -35,7 +22,7 @@ impl FromRequest for User {
     type Error = Error;
     type Future = future::Ready<Result<User, self::Error>>;
 
-    fn from_request(req: &HttpRequest, pl: &mut Payload) -> Self::Future {
+    fn from_request(req: &HttpRequest, _pl: &mut Payload) -> Self::Future {
         ok(req.extensions().get::<User>().unwrap().clone())
     }
 }
@@ -81,7 +68,7 @@ where
         self.0.poll_ready(ctx)
     }
 
-    fn call(&mut self, mut req: Self::Request) -> Self::Future {
+    fn call(&mut self, req: Self::Request) -> Self::Future {
         let service = Rc::clone(&self.0);
         let db_pool = req.app_data::<Data<Pool>>().unwrap().clone();
         let token = match authorization::Authorization::<authorization::Bearer>::parse(&req) {
@@ -90,7 +77,6 @@ where
         };
 
         async move {
-            info!("{}", token);
             match queries::get_user_by_token(&db_pool, token).await {
                 None => Err(ErrorUnauthorized("unauthorized")),
                 Some(user) => {

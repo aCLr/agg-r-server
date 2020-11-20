@@ -11,20 +11,11 @@ table! {
 }
 
 table! {
-    records_meta (id) {
+    records_user_settings (id) {
         id -> Int4,
         user_id -> Int4,
         record_id -> Int4,
         starred -> Bool,
-    }
-}
-
-table! {
-    settings (id) {
-        id -> Int4,
-        user_id -> Int4,
-        name -> Nullable<Text>,
-        value -> Nullable<Text>,
     }
 }
 
@@ -40,6 +31,14 @@ table! {
 }
 
 table! {
+    sources_user_settings (id) {
+        id -> Int4,
+        user_id -> Int4,
+        source_id -> Int4,
+    }
+}
+
+table! {
     users (id) {
         id -> Int4,
         last_read_date -> Timestamp,
@@ -48,7 +47,15 @@ table! {
 }
 
 joinable!(records -> sources (source_id));
-joinable!(records_meta -> records (record_id));
-joinable!(records_meta -> users (user_id));
+joinable!(records_user_settings -> records (record_id));
+joinable!(records_user_settings -> users (user_id));
+joinable!(sources_user_settings -> sources (source_id));
+joinable!(sources_user_settings -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(records, records_meta, settings, sources, users,);
+allow_tables_to_appear_in_same_query!(
+    records,
+    records_user_settings,
+    sources,
+    sources_user_settings,
+    users,
+);
