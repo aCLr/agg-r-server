@@ -92,10 +92,10 @@ where
         async move {
             info!("{}", token);
             match queries::get_user_by_token(&db_pool, token).await {
-                None => err(Err(ErrorUnauthorized("unauthorized"))),
+                None => Err(ErrorUnauthorized("unauthorized")),
                 Some(user) => {
                     req.extensions_mut().insert(user);
-                    service.borrow_mut().call(req)
+                    service.borrow_mut().call(req).await
                 }
             }
         }
