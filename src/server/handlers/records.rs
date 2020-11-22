@@ -1,7 +1,7 @@
 use crate::db::models::{RecordWithMeta, User};
-use crate::db::queries;
+use crate::db::queries::records as records_queries;
 use crate::db::Pool;
-use crate::server::errors::ApiError;
+use crate::errors::ApiError;
 use actix_web::web::{Data, Json, Path, Query};
 use serde::Deserialize;
 
@@ -27,7 +27,7 @@ pub async fn get_records(
 ) -> Result<Json<Vec<RecordWithMeta>>, ApiError> {
     let records = match params.query {
         RecordsQuery::All => {
-            queries::get_all_records(
+            records_queries::get_all_records(
                 &db_pool,
                 user.id,
                 params.source_id,
@@ -38,7 +38,7 @@ pub async fn get_records(
             .await
         }
         RecordsQuery::Starred => {
-            queries::get_starred_records(
+            records_queries::get_starred_records(
                 &db_pool,
                 user.id,
                 params.source_id,
@@ -48,7 +48,7 @@ pub async fn get_records(
             .await
         }
     };
-    Ok(Json(records))
+    Ok(Json(records?))
 }
 
 #[derive(Debug, Deserialize)]
@@ -63,6 +63,6 @@ pub async fn mark_record(
     user: User,
 ) -> Result<Json<RecordWithMeta>, ApiError> {
     Ok(Json(
-        queries::mark_record(&db_pool, user.id, record_id.0, params.starred).await,
+        records_queries::mark_record(&db_pool, user.id, record_id.0, params.starred).await?,
     ))
 }

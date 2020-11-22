@@ -1,29 +1,35 @@
 use actix_web::dev::*;
 use actix_web::http::header::Header;
+
 use actix_web::{
     dev::Payload, error::ErrorUnauthorized, Error, FromRequest, HttpMessage, HttpRequest,
 };
 use futures::{future, task, FutureExt};
+use pbkdf2::{pbkdf2_check, pbkdf2_simple};
 use std::rc::Rc;
 
 use actix_web::dev::ServiceRequest;
 
 use crate::db::models::User;
-use crate::db::queries;
+use crate::db::queries::users as users_queries;
 use crate::db::Pool;
+use crate::errors::ApiError;
 use actix_web::web::Data;
 use actix_web_httpauth::headers::authorization;
-use futures::future::{ok, LocalBoxFuture};
+use futures::future::{err, ok, LocalBoxFuture};
 use futures::task::Poll;
 use std::cell::RefCell;
 
 impl FromRequest for User {
-    type Config = ();
     type Error = Error;
     type Future = future::Ready<Result<User, self::Error>>;
+    type Config = ();
 
     fn from_request(req: &HttpRequest, _pl: &mut Payload) -> Self::Future {
-        ok(req.extensions().get::<User>().unwrap().clone())
+        match req.extensions().get::<User>() {
+            None => err(ErrorUnauthorized("unauthorized".to_string())),
+            Some(user) => ok(user.clone()),
+        }
     }
 }
 
@@ -40,8 +46,8 @@ where
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type InitError = ();
     type Transform = AuthMiddleware<S>;
+    type InitError = ();
     type Future = future::Ready<Result<Self::Transform, Self::InitError>>;
 
     // New Middlware Instance
@@ -77,7 +83,7 @@ where
         };
 
         async move {
-            match queries::get_user_by_token(&db_pool, token).await {
+            match users_queries::get_user_by_token(&db_pool, token).await? {
                 None => Err(ErrorUnauthorized("unauthorized")),
                 Some(user) => {
                     req.extensions_mut().insert(user);
@@ -86,5 +92,17 @@ where
             }
         }
         .boxed_local()
+    }
+}
+
+pub fn hash(password: &str) -> String {
+    pbkdf2_simple(password, 5000).unwrap()
+}
+
+pub async fn login_user(db_pool: &Pool, login: String, password: String) -> Result<User, ApiError> {
+    let user = users_queries::get_user_by_login(db_pool, login).await?;
+    match pbkdf2_check(user.password(), password.as_str()) {
+        Ok(_) => Ok(user),
+        Err(_) => Err(ApiError::Unauthorized("invalid password".to_string())),
     }
 }

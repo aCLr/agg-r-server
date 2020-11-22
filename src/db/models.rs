@@ -19,4 +19,12 @@ pub struct User {
     pub id: i32,
     pub last_read_date: NaiveDateTime,
     pub token: Option<String>,
+    pub login: String,
+    password: String,
+}
+
+impl User {
+    pub fn password(&self) -> &str {
+        self.password.as_str()
+    }
 }

@@ -43,6 +43,8 @@ table! {
         id -> Int4,
         last_read_date -> Timestamp,
         token -> Nullable<Text>,
+        login -> Text,
+        password -> Text,
     }
 }
 

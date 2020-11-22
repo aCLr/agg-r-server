@@ -1,14 +1,8 @@
-use actix_web::{
-    error::{BlockingError, ResponseError},
-    http::StatusCode,
-    HttpResponse,
-};
+use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use derive_more::Display;
-use diesel::{
-    r2d2::PoolError,
-    result::{DatabaseErrorKind, Error as DBError},
-};
+use diesel::result::{DatabaseErrorKind, Error as DBError};
 use serde::{Deserialize, Serialize};
+use tokio_diesel::AsyncError;
 
 #[derive(Debug, PartialEq, Display)]
 #[allow(dead_code)]
@@ -70,7 +64,15 @@ impl From<Vec<String>> for ErrorResponse {
     }
 }
 
-/// Convert DBErrors to ApiErrors
+impl From<AsyncError> for ApiError {
+    fn from(error: AsyncError) -> ApiError {
+        match error {
+            AsyncError::Checkout(e) => ApiError::PoolError(e.to_string()),
+            AsyncError::Error(e) => ApiError::from(e),
+        }
+    }
+}
+
 impl From<DBError> for ApiError {
     fn from(error: DBError) -> ApiError {
         // Right now we just care about UniqueViolation from diesel
@@ -83,24 +85,10 @@ impl From<DBError> for ApiError {
                 }
                 ApiError::InternalServerError("Unknown database error".into())
             }
+            DBError::NotFound => {
+                return ApiError::NotFound("object not found".into());
+            }
             _ => ApiError::InternalServerError("Unknown database error".into()),
-        }
-    }
-}
-
-/// Convert PoolErrors to ApiErrors
-impl From<PoolError> for ApiError {
-    fn from(error: PoolError) -> ApiError {
-        ApiError::PoolError(error.to_string())
-    }
-}
-
-/// Convert Thread BlockingErrors to ApiErrors
-impl From<BlockingError<ApiError>> for ApiError {
-    fn from(error: BlockingError<ApiError>) -> ApiError {
-        match error {
-            BlockingError::Error(api_error) => api_error,
-            BlockingError::Canceled => ApiError::BlockingError("Thread blocking error".into()),
         }
     }
 }

@@ -9,6 +9,7 @@ mod settings;
 use settings::SETTINGS;
 use std::sync::Arc;
 mod db;
+mod errors;
 mod schema;
 mod server;
 
