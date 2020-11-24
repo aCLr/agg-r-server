@@ -3,13 +3,15 @@ use diesel::{delete, insert_into};
 
 use crate::db::Pool;
 use crate::errors::ApiError;
-use crate::schema::{records, records_user_settings, sources_user_settings};
+use crate::schema::{sources, sources_user_settings};
+use agg_r::db::models::Source;
 use diesel::sql_types::{Bool, Nullable};
 use tokio_diesel::*;
 
 sql_function!(fn coalesce(x: Nullable<Bool>, y: Bool) -> Bool);
 
 pub async fn unsubscribe(db_pool: &Pool, source_id: i32, user_id: i32) -> Result<(), ApiError> {
+    use crate::schema::{records, records_user_settings};
     let records = records::table.filter(records::source_id.eq(source_id));
     delete(
         records_user_settings::table.filter(
@@ -41,4 +43,13 @@ pub async fn subscribe(db_pool: &Pool, source_id: i32, user_id: i32) -> Result<(
         .execute_async(db_pool)
         .await?;
     Ok(())
+}
+
+pub async fn get_list(db_pool: &Pool, user_id: i32) -> Result<Vec<Source>, ApiError> {
+    Ok(sources::table
+        .inner_join(sources_user_settings::dsl::sources_user_settings)
+        .filter(sources_user_settings::user_id.eq(user_id))
+        .select(sources::all_columns)
+        .load_async::<Source>(&db_pool)
+        .await?)
 }

@@ -1,4 +1,4 @@
-use super::records::{get_records, mark_record};
+use super::records::{get_records, get_records_for_preview, mark_record};
 use super::sources::{get_list, search, subscribe, unsubscribe};
 use super::users::{login, register};
 use actix_web::web;
@@ -14,6 +14,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/records")
                     .route("/", web::get().to(get_records))
+                    .route("/preview", web::get().to(get_records_for_preview))
                     .route("/{record_id}", web::post().to(mark_record)),
             )
             .service(

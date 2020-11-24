@@ -3,6 +3,7 @@ use crate::db::queries::records as records_queries;
 use crate::db::Pool;
 use crate::errors::ApiError;
 use actix_web::web::{Data, Json, Path, Query};
+use agg_r::db::models::Record;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -18,6 +19,20 @@ pub struct GetFilteredRecordsRequest {
     pub query: RecordsQuery,
     pub limit: i64,
     pub offset: i64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SourceFilter {
+    pub source_id: i32,
+}
+
+pub async fn get_records_for_preview(
+    db_pool: Data<Pool>,
+    params: Query<SourceFilter>,
+) -> Result<Json<Vec<Record>>, ApiError> {
+    Ok(Json(
+        Record::get_filtered(&db_pool, params.source_id, 20, 0).await?,
+    ))
 }
 
 pub async fn get_records(
