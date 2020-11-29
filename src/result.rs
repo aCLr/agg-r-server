@@ -77,12 +77,13 @@ impl From<DBError> for ApiError {
     fn from(error: DBError) -> ApiError {
         // Right now we just care about UniqueViolation from diesel
         // But this would be helpful to easily map errors as our app grows
-        match error {
+        match &error {
             DBError::DatabaseError(kind, info) => {
                 if let DatabaseErrorKind::UniqueViolation = kind {
                     let message = info.details().unwrap_or_else(|| info.message()).to_string();
                     return ApiError::BadRequest(message);
-                }
+                };
+                error!("{:?}", error);
                 ApiError::InternalServerError("Unknown database error".into())
             }
             DBError::NotFound => {

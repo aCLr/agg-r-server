@@ -37,7 +37,7 @@ pub async fn get_starred_records(
         .select((
             records::id,
             records::title,
-            records::guid,
+            records::source_record_id,
             records::source_id,
             records::content,
             records::date,
@@ -77,7 +77,7 @@ pub async fn get_all_records(
         .select((
             records::id,
             records::title,
-            records::guid,
+            records::source_record_id,
             records::source_id,
             records::content,
             records::date,

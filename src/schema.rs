@@ -2,11 +2,12 @@ table! {
     records (id) {
         id -> Int4,
         title -> Nullable<Text>,
-        guid -> Text,
+        source_record_id -> Text,
         source_id -> Int4,
         content -> Text,
         date -> Timestamp,
         image -> Nullable<Text>,
+        external_link -> Text,
     }
 }
 
@@ -27,6 +28,7 @@ table! {
         kind -> Text,
         image -> Nullable<Text>,
         last_scrape_time -> Timestamp,
+        external_link -> Text,
     }
 }
 
