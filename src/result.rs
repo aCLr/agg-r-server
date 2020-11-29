@@ -93,8 +93,8 @@ impl From<DBError> for ApiError {
     }
 }
 
-impl From<agg_r::error::Error> for ApiError {
-    fn from(error: agg_r::error::Error) -> Self {
-        ApiError::InternalServerError(error.message)
+impl From<agg_r::result::Error> for ApiError {
+    fn from(error: agg_r::result::Error) -> Self {
+        ApiError::InternalServerError(error.to_string())
     }
 }

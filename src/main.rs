@@ -8,8 +8,10 @@ use agg_r::config;
 mod settings;
 use settings::SETTINGS;
 use std::sync::Arc;
+use tokio::time::Duration;
+
 mod db;
-mod errors;
+mod result;
 mod schema;
 mod server;
 
@@ -44,7 +46,17 @@ async fn main() {
         Arc::new(aggregator::AggregatorBuilder::new(&agg_config, db_pool.clone()).build());
     let agg_runner = aggregator.clone();
     tokio::spawn(async move { agg_runner.run().await });
-    server::server::server(aggregator, db_pool)
-        .await
-        .expect("can't run server");
+    tokio::time::delay_for(Duration::from_secs(2)).await;
+
+    if SETTINGS.collectors.sync.before_start {
+        aggregator
+            .synchronize(SETTINGS.collectors.sync.secs_depth, None)
+            .await
+            .expect("can't synchronize");
+    }
+    if SETTINGS.server.enabled {
+        server::server::server(aggregator, db_pool)
+            .await
+            .expect("can't run server");
+    }
 }

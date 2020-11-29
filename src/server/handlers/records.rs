@@ -1,7 +1,7 @@
 use crate::db::models::{RecordWithMeta, User};
 use crate::db::queries::records as records_queries;
 use crate::db::Pool;
-use crate::errors::ApiError;
+use crate::result::ApiError;
 use actix_web::web::{Data, Json, Path, Query};
 use agg_r::db::models::Record;
 use serde::Deserialize;

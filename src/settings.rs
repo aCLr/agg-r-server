@@ -56,9 +56,16 @@ pub struct TgCollector {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct Synchronize {
+    pub before_start: bool,
+    pub secs_depth: i32,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Collectors {
     pub http: HttpCollector,
     pub tg: TgCollector,
+    pub sync: Synchronize,
 }
 
 #[derive(Debug, Deserialize)]

@@ -1,5 +1,5 @@
 use crate::db::{models::User, queries::sources as sources_queries, Pool};
-use crate::errors::ApiError;
+use crate::result::ApiError;
 use actix_web::web::{Data, Json, Path, Query};
 use agg_r::aggregator::Aggregator;
 use agg_r::db::models::Source;
