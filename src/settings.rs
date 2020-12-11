@@ -53,6 +53,8 @@ pub struct TgCollector {
     pub api_id: i64,
     pub api_hash: String,
     pub phone: String,
+    pub max_download_queue_size: usize,
+    pub files_directory: String,
 }
 
 #[derive(Debug, Deserialize)]
